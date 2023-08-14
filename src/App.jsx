@@ -1,20 +1,28 @@
 import Header from "./components/Header";
 import InputForm from "./components/InputForm";
 import WeatherCard from "./components/WeatherCard";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
 import WeatherDetails from "./components/WeatherDetails";
-
-const API_KEY = "2d4c650292c84ef7ef1b01348fa8a426";
+import { useState } from "react";
 
 function App() {
+  const [coordinates, setCoordinates] = useState();
+
+  function handleSubmit(coordinates) {
+    setCoordinates(coordinates);
+  }
+
   return (
     <>
       <Header />
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<WeatherCard />}>
-            <Route path="form" element={<InputForm />} />
-            <Route path="weather" element={<WeatherDetails />} />
+            <Route index element={<InputForm onSubmit={handleSubmit} />} />
+            <Route
+              path="weather"
+              element={<WeatherDetails coordinates={coordinates} />}
+            />
           </Route>
         </Routes>
       </BrowserRouter>

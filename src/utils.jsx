@@ -7,4 +7,6 @@ const flagemojiToPNG = (flag) => {
   );
 };
 
-export { flagemojiToPNG };
+const API_KEY = "2d4c650292c84ef7ef1b01348fa8a426";
+
+export { flagemojiToPNG, API_KEY };
