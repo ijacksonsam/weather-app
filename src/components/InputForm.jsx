@@ -9,11 +9,10 @@ function InputForm({ onSubmit }) {
   const [cities, setCities] = useState([]);
   const navigate = useNavigate();
 
-  async function fetchCities(city, controller) {
+  async function fetchCity(city) {
     try {
       const data = await fetch(
-        `https://api.openweathermap.org/geo/1.0/direct?q=${city}&limit=5&appid=${API_KEY}`,
-        { signal: controller.signal }
+        `https://api.openweathermap.org/geo/1.0/direct?q=${city}&limit=5&appid=${API_KEY}`
       );
       const cities = await data.json();
       setCities(cities);
@@ -26,12 +25,22 @@ function InputForm({ onSubmit }) {
   useEffect(
     function () {
       const controller = new AbortController();
-      try {
-        if (value) fetchCities(value, controller);
-        else setCities([]);
-      } catch (e) {
-        console.log(e);
+      async function fetchCities(city) {
+        try {
+          const data = await fetch(
+            `https://api.openweathermap.org/geo/1.0/direct?q=${city}&limit=5&appid=${API_KEY}`,
+            { signal: controller.signal }
+          );
+          const cities = await data.json();
+          setCities(cities);
+        } catch (e) {
+          if (e.name === "AbortError") return;
+          console.log(e);
+        }
       }
+      if (value) fetchCities(value);
+      else setCities([]);
+
       return function () {
         controller.abort();
       };
@@ -41,7 +50,7 @@ function InputForm({ onSubmit }) {
 
   function handleSubmit(e) {
     e.preventDefault();
-    fetchCities(value);
+    fetchCity(value);
     onSubmit({ lat: cities.at(0).lat, lng: cities.at(0).lon });
     navigate(`/weather/${value}`);
   }
