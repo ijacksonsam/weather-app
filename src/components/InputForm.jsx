@@ -1,7 +1,6 @@
 /* eslint-disable react/prop-types */
 import { useEffect, useState } from "react";
 import styles from "./InputForm.module.css";
-import useGeolocation from "../hooks/useGeolocation";
 import { API_KEY, flagemojiToPNG } from "../utils";
 import { useNavigate } from "react-router-dom";
 
@@ -10,22 +9,32 @@ function InputForm({ onSubmit }) {
   const [cities, setCities] = useState([]);
   const navigate = useNavigate();
 
-  async function fetchCities(city) {
-    const data = await fetch(
-      `https://api.openweathermap.org/geo/1.0/direct?q=${city}&limit=5&appid=${API_KEY}`
-    );
-    const cities = await data.json();
-    setCities(cities);
+  async function fetchCities(city, controller) {
+    try {
+      const data = await fetch(
+        `https://api.openweathermap.org/geo/1.0/direct?q=${city}&limit=5&appid=${API_KEY}`,
+        { signal: controller.signal }
+      );
+      const cities = await data.json();
+      setCities(cities);
+    } catch (e) {
+      if (e.name === "AbortError") return;
+      console.log(e);
+    }
   }
 
   useEffect(
     function () {
+      const controller = new AbortController();
       try {
-        if (value) fetchCities(value);
+        if (value) fetchCities(value, controller);
         else setCities([]);
       } catch (e) {
         console.log(e);
       }
+      return function () {
+        controller.abort();
+      };
     },
     [value]
   );
@@ -34,7 +43,7 @@ function InputForm({ onSubmit }) {
     e.preventDefault();
     fetchCities(value);
     onSubmit({ lat: cities.at(0).lat, lng: cities.at(0).lon });
-    navigate("/weather");
+    navigate(`/weather/${value}`);
   }
 
   return (

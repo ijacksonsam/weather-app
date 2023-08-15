@@ -20,7 +20,7 @@ function App() {
           <Route path="/" element={<WeatherCard />}>
             <Route index element={<InputForm onSubmit={handleSubmit} />} />
             <Route
-              path="weather"
+              path="weather/:id"
               element={<WeatherDetails coordinates={coordinates} />}
             />
           </Route>
